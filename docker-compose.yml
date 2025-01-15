@@ -1,0 +1,36 @@
+services:
+  api_service:
+    env_file:
+      - .env
+    build:
+      context: .
+    image: example/example_service:latest
+    container_name: example_service
+    ports:
+      - 8000:8000
+      - 5678:5678
+    volumes:
+      - .:/app
+      - .env:/app/.env
+
+  db_service:
+    image: postgres:13
+    container_name: example_postgres
+    environment:
+      POSTGRES_USER: example_user
+      POSTGRES_PASSWORD: example_password
+      POSTGRES_DB: example_db
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - example_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  example_network:
+    driver: bridge
