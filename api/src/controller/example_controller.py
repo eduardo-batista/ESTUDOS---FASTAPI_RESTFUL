@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
+from api.src.model.schema.example_request import ExampleRequest
 from api.src.service.example_service import ExampleService
-from api.src.model.entity.example_entity import Example
 
 example_router = APIRouter(prefix='/example')
 service = ExampleService()
@@ -15,13 +15,13 @@ async def get_all():
     return await service.get_all()
 
 @example_router.post('/', status_code=status.HTTP_201_CREATED)
-async def create(example_request: Example):
+async def create(example_request: ExampleRequest):
     return await service.create(example_request)
 
 @example_router.put('/{id}', status_code=status.HTTP_200_OK)
-async def update(example_request: Example, id: int):
+async def update(example_request: ExampleRequest, id: int):
     return await service.update(example_request, id)
 
 @example_router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-async def get_all(id: int):
-    return await service.get_all(id)
+async def delete(id: int):
+    return await service.delete(id)

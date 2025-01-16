@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Type, TypeVar, Generic, List
@@ -18,41 +19,42 @@ class BaseRepository(Generic[T]):
 
     async def get(self, id: int) -> T:
         query = select(self.entity).filter(getattr(self.entity, self.primary_key_name) == id)
-        async with self.db.begin():
-            result = await self.db.execute(query)
-            response = result.scalars().first()
-            await self.db.close()
-            return response
+        async with self.get_session() as session:
+            result = await session.execute(query)
+            return result.scalars().first()
 
     async def get_all(self) -> List[T]:
         query = select(self.entity)
-        async with self.db.begin():
-            result = await self.db.execute(query)
-            response = result.scalars().all()
-            await self.db.close()
-            return response
+        async with self.get_session() as session:
+            result = await session.execute(query)
+            return result.scalars().all()
 
     async def create(self, obj_in: T) -> T:
-        async with self.db.begin():
-            self.db.add(obj_in)
-            await self.db.flush()
-            await self.db.commit()
-            await self.db.close()
+        async with self.get_session() as session:
+            session.add(obj_in)
+            await session.flush()
+            await session.commit()
             return obj_in
 
     async def update(self, obj_in: T) -> T:
-        async with self.db.begin():
-            await self.db.merge(obj_in)
-            await self.db.commit()
-            await self.db.close()
+        async with self.get_session() as session:
+            await session.merge(obj_in)
+            await session.commit()
             return obj_in
 
     async def delete(self, id: int) -> None:
-        async with self.db.begin():
+        async with self.get_session() as session:
             query = select(self.entity).filter(getattr(self.entity, self.primary_key_name) == id)
-            result = await self.db.execute(query)
+            result = await session.execute(query)
             obj = result.scalars().first()
             if obj:
-                await self.db.delete(obj)
-                await self.db.commit()
-            await self.db.close()
+                await session.delete(obj)
+                await session.commit()
+                
+    @asynccontextmanager
+    async def get_session(self):
+        session = self.session_factory()
+        try:
+            yield session
+        finally:
+            await session.close()
