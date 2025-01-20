@@ -12,10 +12,3 @@ class Example(BaseEntity):
 
     def __repr__(self):
         return (f"<EntityExample(id={self.id}, (example_field={self.example_field})>")
-    
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "example_field": self.example_field
-        }

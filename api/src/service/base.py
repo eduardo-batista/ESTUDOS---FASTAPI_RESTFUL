@@ -1,14 +1,16 @@
-from typing import Generic, List, Type, TypeVar
+from typing import Generic, Sequence, Type, TypeVar
 
+from api.src.model.entity.base import BaseEntity
 from api.src.repository.base import BaseRepository
 
-T = TypeVar('T', bound=BaseRepository)
+R = TypeVar('R', bound=BaseRepository)
+T = TypeVar('T', bound=BaseEntity)
 
-class BaseService(Generic[T]):
-    def __init__(self, repository: Type[T]):
-        self.repository = repository()
+class BaseService(Generic[R, T]):
+    def __init__(self, repository: Type[R]):
+        self.repository = repository(Type[T])
     
-    async def get(self, id: int) -> T:
+    async def get(self, id: int) -> T | None:
         """
         Retrieves an object based on the provided ID.
         
@@ -20,7 +22,7 @@ class BaseService(Generic[T]):
         """
         return await self.repository.get(id)
     
-    async def get_all(self) -> List[T]:
+    async def get_all(self) -> Sequence[T]:
         """
         Retrieves all objects.
         

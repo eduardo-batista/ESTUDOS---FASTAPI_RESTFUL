@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import HTTPException
 from sqlalchemy import select
-from typing import Type, TypeVar, Generic, List
+from typing import Sequence, Type, TypeVar, Generic
 from api.database.database import DatabaseConfig
 from api.src.model.entity.base import BaseEntity
 
@@ -30,7 +30,7 @@ class BaseRepository(Generic[T]):
         primary_key = mapper.primary_key[0]
         return primary_key.name
 
-    async def get(self, id: int) -> T:
+    async def get(self, id: int) -> T | None:
         """
         Retrieves an object based on the provided ID.
         
@@ -45,7 +45,7 @@ class BaseRepository(Generic[T]):
             result = await session.execute(query)
             return result.scalars().first()
 
-    async def get_all(self) -> List[T]:
+    async def get_all(self) -> Sequence[T]:
         """
         Retrieves all objects.
         
@@ -134,7 +134,7 @@ class BaseRepository(Generic[T]):
             async with self.get_session() as session:
                 # Perform database operations
         """
-        session = self.session_factory()
+        session = self.session_factory
         try:
             yield session
         finally:
