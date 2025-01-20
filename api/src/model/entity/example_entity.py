@@ -7,6 +7,9 @@ class Example(BaseEntity):
     id = Column(Integer, primary_key=True)
     example_field = Column(String(45), primary_key=True)
 
+    def __init__(self, example_field):
+        self.example_field = example_field
+
     def __repr__(self):
         return (f"<EntityExample(id={self.id}, (example_field={self.example_field})>")
     
