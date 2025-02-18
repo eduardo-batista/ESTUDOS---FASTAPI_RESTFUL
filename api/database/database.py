@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 class DatabaseConfig:
     _engine = None
@@ -32,6 +32,6 @@ class DatabaseConfig:
             )
         return self._engine
 
-    def get_async_session_local(self) -> AsyncSession:
+    def get_async_session_local(self) -> async_sessionmaker:
         engine = self.get_async_engine()
-        return sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+        return async_sessionmaker(bind=engine, autoflush=True, expire_on_commit=False)

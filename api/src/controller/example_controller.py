@@ -1,8 +1,7 @@
 from typing import Sequence
 from fastapi import APIRouter, status
 
-from api.src.model.entity.example_entity import Example
-from api.src.model.schema.example_request import ExampleRequest
+from api.src.model.schema.example_schema import ExampleSchema
 from api.src.service.example_service import ExampleService
 
 example_router = APIRouter(prefix='/example')
@@ -13,7 +12,7 @@ service = ExampleService()
         '/{id}', status_code=status.HTTP_200_OK,
         description="Retrieves an 'Example' object based on the provided ID."
         )
-async def get(id: int) -> Example | None:
+async def get(id: int) -> ExampleSchema | None:
     return await service.get(id)
 
 # GET /example
@@ -21,7 +20,7 @@ async def get(id: int) -> Example | None:
         '/', status_code=status.HTTP_200_OK,
         description="Retrieves all 'Example' objects."
         )
-async def get_all() -> Sequence[Example]:
+async def get_all() -> Sequence[ExampleSchema]:
     return await service.get_all()
 
 # POST /example
@@ -29,7 +28,7 @@ async def get_all() -> Sequence[Example]:
         '/', status_code=status.HTTP_201_CREATED,
         description="Creates a new 'Example' object with the provided data."
         )
-async def create(example_request: ExampleRequest) -> Example:
+async def create(example_request: ExampleSchema) -> ExampleSchema:
     return await service.create(example_request.__get_entity__())
 
 # PUT /example/{id}
@@ -37,7 +36,7 @@ async def create(example_request: ExampleRequest) -> Example:
         '/{id}', status_code=status.HTTP_200_OK,
         description="Updates an existing 'Example' object with the provided data."
         )
-async def update(example_request: ExampleRequest, id: int) -> Example:
+async def update(example_request: ExampleSchema, id: int) -> ExampleSchema:
     return await service.update(example_request.__get_entity__(), id)
 
 # DELETE /example/{id}

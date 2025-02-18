@@ -1,16 +1,19 @@
 from typing import Generic, Sequence, Type, TypeVar
 
 from api.src.model.entity.base import BaseEntity
+from api.src.model.schema.base import BaseSchema
 from api.src.repository.base import BaseRepository
 
 R = TypeVar('R', bound=BaseRepository)
 T = TypeVar('T', bound=BaseEntity)
+S = TypeVar('S', bound=BaseSchema)
 
-class BaseService(Generic[R, T]):
-    def __init__(self, repository: Type[R]):
-        self.repository = repository(Type[T])
+class BaseService(Generic[R, T, S]):
+    def __init__(self, repository: Type[R], entity: Type[T], schema: Type[S]):
+        self.repository = repository(entity)
+        self.schema = schema
     
-    async def get(self, id: int) -> T | None:
+    async def get(self, id: int) -> S | None:
         """
         Retrieves an object based on the provided ID.
         
@@ -20,18 +23,22 @@ class BaseService(Generic[R, T]):
         Returns:
         - The object with the provided ID.
         """
-        return await self.repository.get(id)
+        entity = await self.repository.get(id)
+        if entity is None:
+            return None
+        return self.schema.model_validate(entity)
     
-    async def get_all(self) -> Sequence[T]:
+    async def get_all(self) -> Sequence[S]:
         """
         Retrieves all objects.
         
         Returns:
         - List of objects.
         """
-        return await self.repository.get_all()
+        entities = await self.repository.get_all()
+        return [self.schema.model_validate(entity) for entity in entities]
     
-    async def create(self, obj_in) -> T:
+    async def create(self, obj_in: T) -> S:
         """
         Creates a new object with the provided data.
 
@@ -41,9 +48,10 @@ class BaseService(Generic[R, T]):
         Returns:
         - The newly created object.
         """
-        return await self.repository.create(obj_in)
+        entity = await self.repository.create(obj_in)
+        return self.schema.model_validate(entity)
     
-    async def update(self, obj_in, id) -> T:
+    async def update(self, obj_in: T, id: int) -> S:
         """
         Updates an existing object with the provided data.
 
@@ -54,7 +62,8 @@ class BaseService(Generic[R, T]):
         Returns:
         - The updated object.
         """
-        return await self.repository.update(obj_in, id)
+        entity = await self.repository.update(obj_in, id)
+        return self.schema.model_validate(entity)
     
     async def delete(self, id: int) -> None:
         """

@@ -134,7 +134,7 @@ class BaseRepository(Generic[T]):
             async with self.get_session() as session:
                 # Perform database operations
         """
-        session = self.session_factory
+        session = self.session_factory()
         try:
             yield session
         finally:
