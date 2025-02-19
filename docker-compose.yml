@@ -12,7 +12,7 @@ services:
     depends_on:
       - db_service
     volumes:
-      - .:/app
+      - ./api:/app/api
       - .env:/app/.env
     networks:
       - example_network

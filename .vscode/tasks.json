@@ -4,7 +4,7 @@
         {
             "label": "Run Lint",
             "type": "shell",
-            "command": "docker exec example_service bash -c 'PYTHONIOENCODING=utf-8 pylint .'",
+            "command": "docker exec example_service bash -c 'pylint ./api'",
             "presentation": {
                 "reveal": "always",
                 "panel": "new"
