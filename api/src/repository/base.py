@@ -1,13 +1,21 @@
+"""
+Base Repository Module
+
+This Repository defines the base class for all repositories.
+"""
+from typing import Sequence, Type, TypeVar, Generic
 from contextlib import asynccontextmanager
 from fastapi import HTTPException
 from sqlalchemy import select
-from typing import Sequence, Type, TypeVar, Generic
+
 from api.database.database import DatabaseConfig
 from api.src.model.entity.base import BaseEntity
 
 T = TypeVar('T', bound=BaseEntity)
 
 class BaseRepository(Generic[T]):
+    """Base class for all repositories."""
+
     def __init__(self, entity: Type[T]):
         self.entity = entity
         self.session_factory = DatabaseConfig().get_async_session_local()
@@ -30,17 +38,17 @@ class BaseRepository(Generic[T]):
         primary_key = mapper.primary_key[0]
         return primary_key.name
 
-    async def get(self, id: int) -> T | None:
+    async def get(self, entity_id: int) -> T | None:
         """
         Retrieves an object based on the provided ID.
-        
+
         Args:
-        - id (int): The ID of the object to retrieve.
+        - entity_id (int): The ID of the object to retrieve.
 
         Returns:
         - The object with the provided ID.
         """
-        query = select(self.entity).filter(getattr(self.entity, self.primary_key_name) == id)
+        query = select(self.entity).filter(getattr(self.entity, self.primary_key_name) == entity_id)
         async with self.get_session() as session:
             result = await session.execute(query)
             return result.scalars().first()
@@ -48,7 +56,7 @@ class BaseRepository(Generic[T]):
     async def get_all(self) -> Sequence[T]:
         """
         Retrieves all objects.
-        
+
         Returns:
         - List of objects.
         """
@@ -63,7 +71,7 @@ class BaseRepository(Generic[T]):
 
         Args:
         - obj_in: Data to create the new object.
-        
+
         Returns:
         - The newly created object.
         """
@@ -72,53 +80,57 @@ class BaseRepository(Generic[T]):
             await session.commit()
             return obj_in
 
-    async def update(self, obj_in: T, id: int) -> T:
+    async def update(self, obj_in: T, entity_id: int) -> T:
         """
         Updates an existing object with the provided data.
 
         Args:
         - obj_in: Data to update the object.
-        - id (int): The ID of the object to update.
-        
+        - entity_id (int): The ID of the object to update.
+
         Returns:
         - The updated object.
         """
         async with self.get_session() as session:
-            query = select(self.entity).filter(getattr(self.entity, self.primary_key_name) == id)
+            query = select(self.entity).filter(
+                getattr(self.entity, self.primary_key_name) == entity_id
+            )
             result = await session.execute(query)
             obj = result.scalars().first()
-            
+
             if not obj:
-                raise HTTPException(404, f'Não foi encontrado um registro com ID: {id}.')
-            
+                raise HTTPException(404, f'Não foi encontrado um registro com ID: {entity_id}.')
+
             for key, value in obj_in.to_dict().items():
-                if key != 'id':
+                if key != 'entity_id':
                     setattr(obj, key, value)
             await session.commit()
             return obj
 
-    async def delete(self, id: int) -> None:
+    async def delete(self, entity_id: int) -> None:
         """
         Deletes an object based on the provided ID.
 
         Args:
-        - id (int): The ID of the object to delete.
+        - entity_id (int): The ID of the object to delete.
 
         Returns:
         - No content.
         """
         async with self.get_session() as session:
-            query = select(self.entity).filter(getattr(self.entity, self.primary_key_name) == id)
+            query = select(self.entity).filter(
+                getattr(self.entity, self.primary_key_name) == entity_id
+            )
             result = await session.execute(query)
             obj = result.scalars().first()
-            
+
             if not obj:
-                raise HTTPException(404, f'Não foi encontrado um registro com ID: {id}.')
-            
+                raise HTTPException(404, f'Não foi encontrado um registro com ID: {entity_id}.')
+
             if obj:
                 await session.delete(obj)
                 await session.commit()
-                
+
     @asynccontextmanager
     async def get_session(self):
         """
