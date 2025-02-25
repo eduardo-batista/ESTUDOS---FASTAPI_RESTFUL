@@ -102,7 +102,7 @@ class BaseRepository(Generic[T]):
                 raise HTTPException(404, f'Não foi encontrado um registro com ID: {entity_id}.')
 
             for key, value in obj_in.to_dict().items():
-                if key != 'entity_id':
+                if key != self.primary_key_name:
                     setattr(obj, key, value)
             await session.commit()
             return obj

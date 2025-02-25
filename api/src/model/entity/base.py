@@ -9,11 +9,7 @@ from sqlalchemy.orm import DeclarativeBase
 class BaseEntity(DeclarativeBase):
     """Base class for all entities."""
 
-    id = Column(Integer, primary_key=True)
-
-    def __init__(self, entity_id: int):
-        """Initialize the entity with an ID."""
-        self.id = entity_id
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     def to_dict(self):
         """

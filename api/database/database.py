@@ -18,13 +18,13 @@ class DatabaseConfig:
         """Initialize the database configuration by loading environment variables."""
         load_dotenv()
         self.config = {
-            "db_name": os.getenv("DB_NAME") or 'example_db',
-            "db_user": os.getenv("DB_USER") or 'example_user',
-            "db_password": os.getenv("DB_PASSWORD") or 'example_password',
-            "db_host": os.getenv("DB_HOST") or 'db_service',
-            "db_port": os.getenv("DB_PORT") or '5432',
-            "db_type": os.getenv("DB_TYPE") or 'postgresql',
-            "db_async_driver": os.getenv("DB_ASYNC") or 'asyncpg',
+            "db_name": os.getenv("DB_NAME"),
+            "db_user": os.getenv("DB_USER"),
+            "db_password": os.getenv("DB_PASSWORD"),
+            "db_host": os.getenv("DB_HOST"),
+            "db_port": os.getenv("DB_PORT"),
+            "db_type": os.getenv("DB_TYPE"),
+            "db_async_driver": os.getenv("DB_ASYNC"),
         }
 
     def get_database_url(self) -> str:
